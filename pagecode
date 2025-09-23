@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Savings Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Inline "Send Code" button overrides (undo global 100% width etc.) */
+        #financial-calculator-container #sendCodeBtn{
+            position:absolute !important;
+            top:50% !important;
+            right:0.25rem !important;
+            transform:translateY(-50%) !important;
+            width:auto !important;
+            margin-top:0 !important;
+            padding:0.375rem 0.625rem !important; /* slightly larger per your request */
+            font-size:0.8125rem !important;       /* ~13px */
+            line-height:1 !important;
+            background:#2563eb !important;
+            color:#fff !important;
+            border-radius:0.375rem !important;
+            box-shadow:0 1px 2px rgba(0,0,0,.08) !important;
+        }
+        #financial-calculator-container #sendCodeBtn:hover{ background:#1d4ed8 !important; }
+
+        /* Make room so text doesn't go under the button */
+        #financial-calculator-container #phone{ padding-right:7.5rem !important; }
+
+        /* Keep error text red even with global styles */
+        #financial-calculator-container .text-error{ color:#dc2626 !important; }
+        #financial-calculator-container .text-ok{ color:#16a34a !important; }
+
+        #financial-calculator-container{font-family:'Inter',sans-serif !important;color:#374151 !important}#financial-calculator-container h1{font-family:'Inter',sans-serif !important;font-size:1.875rem !important;line-height:2.25rem !important;font-weight:700 !important;color:#1f2937 !important}#financial-calculator-container h2{font-family:'Inter',sans-serif !important;font-size:1.25rem !important;font-weight:600 !important;color:#1f2937 !important}#financial-calculator-container h3{font-family:'Inter',sans-serif !important;font-size:1.125rem !important;font-weight:700 !important;color:#374151 !important}#financial-calculator-container p{font-family:'Inter',sans-serif !important;font-size:1rem !important;color:#6b7280 !important}#financial-calculator-container label{font-family:'Inter',sans-serif !important;font-size:0.875rem !important;font-weight:500 !important;color:#374151 !important}#financial-calculator-container .disclaimer-text{font-family:'Inter',sans-serif !important;font-size:0.75rem !important;color:#9ca3af !important}#financial-calculator-container .output-label{font-family:'Inter',sans-serif !important;margin-top:0.5rem !important;font-size:1rem !important;color:#4b5563 !important}#financial-calculator-container .output-value{font-family:'Inter',sans-serif !important;font-weight:700 !important;color:#2563eb !important;font-size:1.875rem !important}#financial-calculator-container .output-card-main .output-value{font-size:2.25rem !important}#financial-calculator-container button{font-family:'Inter',sans-serif !important;font-weight:700 !important;padding:0.75rem 1rem !important;border-radius:0.5rem !important;transition:background-color .3s ease,opacity .3s ease !important;border:none !important;cursor:pointer !important;width:100% !important;margin-top:1rem !important;display:inline-flex;align-items:center;justify-content:center}#financial-calculator-container button:disabled{opacity:.6 !important;cursor:not-allowed !important}#financial-calculator-container #calculateBtn,#financial-calculator-container #submitContactBtn{background-color:#2563eb !important;color:#fff !important}#financial-calculator-container #calculateBtn:hover,#financial-calculator-container #submitContactBtn:hover{background-color:#1d4ed8 !important}#financial-calculator-container #recalculateBtn{background-color:#4b5563 !important;color:#fff !important;margin-top:2rem !important}#financial-calculator-container #recalculateBtn:hover{background-color:#374151 !important}#financial-calculator-container input[type=number],#financial-calculator-container input[type=text],#financial-calculator-container input[type=email],#financial-calculator-container input[type=tel]{font-family:'Inter',sans-serif !important;margin-top:0.25rem !important;display:block !important;width:100% !important;padding:0.5rem 0.75rem !important;background-color:#fff !important;border:1px solid #d1d5db !important;border-radius:0.375rem !important;box-shadow:0 1px 2px 0 rgba(0,0,0,.05) !important;font-size:0.875rem !important}#financial-calculator-container input:focus{outline:2px solid transparent !important;outline-offset:2px !important;border-color:#2563eb !important;box-shadow:0 0 0 2px #dbeafe !important}.output-card{background-color:#f8fafc !important;border:1px solid #e2e8f0 !important;border-radius:0.75rem !important;padding:1.5rem !important;display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:center !important}#financial-calculator-container .tab-btn{font-weight:600 !important;border-bottom:3px solid transparent !important;transition:all .2s ease-in-out !important;color:#4b5563 !important;background-color:transparent !important;margin-top:0 !important;padding:0.75rem 0.5rem !important}#financial-calculator-container .tab-btn.active{color:#2563eb !important;border-bottom-color:#2563eb !important}#contactSection{position:relative !important;overflow:hidden !important;border-radius:0.85rem !important;padding:2px !important;margin-top:2rem !important}#contactSection::before{content:'' !important;position:absolute !important;top:50% !important;left:50% !important;width:250% !important;height:250% !important;background:conic-gradient(from 180deg at 50% 50%,transparent 0%,#3b82f6 2%,transparent 5%);transform:translate(-50%,-50%);animation:rotate-glow 5s linear infinite;z-index:1 !important}@keyframes rotate-glow{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}.contact-content-wrapper{background-color:#f9fafb !important;padding:1.5rem !important;border-radius:0.75rem !important;position:relative;z-index:2}@media (min-width:768px){#financial-calculator-container h1{font-size:2.25rem !important}#financial-calculator-container h2{font-size:1.5rem !important}#financial-calculator-container .output-value{font-size:2.25rem !important}#financial-calculator-container .output-card-main .output-value{font-size:3rem !important}}.spinner{border:4px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:50%;border-left-color:#fff;animation:spin 1s ease infinite}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+        /* make the inline auth buttons compact (not full width) */
+        #financial-calculator-container #sendCodeBtn,
+        #financial-calculator-container #checkCodeBtn {
+        width: auto !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        }
+
+        #financial-calculator-container #verifyStatus.text-red-600 {
+        color: #dc2626 !important; /* Tailwind red-600 */
+        }
+
+        /* Floating CTA (Tailor My Loan Structure) */
+        @media (min-width:640px){
+	    #financial-calculator-container .tab-btn{padding:0.75rem 1.5rem !important}
+        }
+        /* Floating CTA (Tailor My Loan Structure) */
+        #tailorLoanBtn {
+            font-family: 'Inter', sans-serif !important;
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9) translateY(20px);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            background-color: transparent !important;
+            color: #fff !important;
+            border-radius: 9999px !important;
+            width: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #tailorLoanBtn .btn-inner {
+            background-color: #2563eb;
+            color: #fff;
+            padding: 0.875rem 1.75rem;
+            border-radius: 9999px;
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        /* 👇 Pop-in when it first becomes visible */
+        #tailorLoanBtn.visible {
+            visibility: visible !important;
+            animation: clean-pop-in .5s ease-out forwards;
+        }
+
+        @keyframes clean-pop-in {
+            0% {
+                transform: translateX(-50%) scale(0.85) translateY(30px);
+                opacity: 0;
+            }
+            60% {
+                transform: translateX(-50%) scale(1.05) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Desktop idle pulse */
+        #tailorLoanBtn.idle {
+            animation: idle-fade 3s ease-in-out infinite;
+        }
+
+        @keyframes idle-fade {
+            0%   { transform: translateX(-50%) scale(1);    opacity: 1; }
+            50%  { transform: translateX(-50%) scale(1.02); opacity: 0.7; }
+            100% { transform: translateX(-50%) scale(1);    opacity: 1; }
+        }
+
+        /* Mobile: same style but slightly calmer (shorter scale difference) */
+        @media (max-width: 640px){
+            #tailorLoanBtn.idle {
+                animation: idle-fade-mobile 3s ease-in-out infinite;
+            }
+
+            @keyframes idle-fade-mobile {
+                0%   { transform: translateX(-50%) scale(1);    opacity: 1; }
+                50%  { transform: translateX(-50%) scale(1.015); opacity: 0.7; }
+                100% { transform: translateX(-50%) scale(1);    opacity: 1; }
+            }
+        }
+        /* Mobile refinements: bigger padding & slightly larger text, but no wrapping */
+        @media (max-width: 640px) {
+            #tailorLoanBtn .btn-inner {
+                font-size: 0.95rem;      /* a bit bigger */
+                padding: 0.8rem 1.4rem;  /* more comfortable pill */
+                white-space: nowrap;     /* prevent split into 2 lines */
+            }
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div id="financial-calculator-container" class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <div id="inputPage">
+            <header class="text-center mb-8">
+                <h1>Mortgage Savings Calculator</h1>
+                <p class="mt-2">Enter your details to see what you could save.</p>
+            </header>
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                <h2 class="mb-6">Your Financial Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <div><label for="loanBalance">Current Loan Balance ($)</label><input type="number" id="loanBalance" value="686000"></div>
+                    <div><label for="monthlyRepayment">Current Monthly Repayment ($)</label><input type="number" id="monthlyRepayment" value="4793"></div>
+                    <div><label for="savings">Current Savings ($)</label><input type="number" id="savings" value="20000"></div>
+                    <div><label for="monthlyIncome">Monthly Household Income ($)</label><input type="number" id="monthlyIncome" value="14002"></div>
+                    <div><label for="monthlyLivingExpenses">Monthly Living Expenses ($)</label><input type="number" id="monthlyLivingExpenses" value="5200"></div>
+                    <div><label for="interestRate">Interest Rate (%)</label><input type="number" id="interestRate" value="6.14" step="0.01"></div>
+                </div>
+                <button id="calculateBtn">Calculate Savings</button>
+            </div>
+        </div>
+        <div id="loadingPage" class="hidden text-center py-20">
+            <div class="flex flex-col items-center justify-center">
+                <div class="spinner mb-4" style="border-left-color: #2563eb;"></div>
+                <h2>Calculating your potential savings...</h2>
+                <p>This will just take a moment.</p>
+            </div>
+        </div>
+        <div id="outputPage" class="hidden">
+            <header class="text-center mb-6">
+                <h1>Your Savings Potential</h1>
+                <p class="mt-2">Compare structures to see how you can save the most.</p>
+                <p class="disclaimer-text mt-3 max-w-2xl mx-auto">Disclaimer: These numbers are estimates. Accurate projections can be determined by breaking everything down with a professional.</p>
+            </header>
+            <div class="border-b border-gray-200 mb-8">
+                <nav class="flex justify-center -mb-px" aria-label="Tabs">
+                    <button id="tabOffset" data-tab="offset" class="tab-btn active">Balanced Structure</button>
+                    <button id="tabAggressive" data-tab="aggressive" class="tab-btn">Aggressive Structure</button>
+                    <button id="tabFlex" data-tab="flex" class="tab-btn">Flexible Structure</button>
+                </nav>
+            </div>
+            <div id="contentOffset" data-tab-content="offset">
+                <div class="flex flex-col">
+                    <div class="order-2 md:order-1 mb-8">
+                        <h2 class="text-center mb-6">Loan Comparison</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="originalTermOffset">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newTermOffset" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Loan Term</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="currentRepaymentOffset">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newRepaymentOffset" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Monthly Repayment</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="originalInterestOffset">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newInterestOffset" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Total Interest</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 md:order-2">
+                        <h2 class="text-center mb-6">Savings Breakdown</h2>
+                        <div class="space-y-6 mb-8">
+                            <div class="output-card output-card-main"><span class="output-value" id="cashSavedOffset">--</span><span class="output-label">Total Cash Saved</span></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                                <div class="output-card"><span class="output-value" id="yearsSavedOffset">--</span><span class="output-label">Years Saved</span></div>
+                                <div class="output-card"><span class="output-value" id="interestSavedOffset">--</span><span class="output-label">Interest Saved</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-10 h-64 md:h-auto"><canvas id="loanChartOffset"></canvas></div>
+            </div>
+            <div id="contentAggressive" data-tab-content="aggressive" class="hidden">
+                <div class="flex flex-col">
+                    <div class="order-2 md:order-1 mb-8">
+                        <h2 class="text-center mb-6">Loan Comparison</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                           <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="originalTermAggressive">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newTermAggressive" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Loan Term</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="currentRepaymentAggressive">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newRepaymentAggressive" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Monthly Repayment</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="originalInterestAggressive">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newInterestAggressive" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Total Interest</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 md:order-2">
+                        <h2 class="text-center mb-6">Savings Breakdown</h2>
+                        <div class="space-y-6 mb-8">
+                            <div class="output-card output-card-main"><span class="output-value" id="cashSavedAggressive">--</span><span class="output-label">Total Cash Saved</span></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                                <div class="output-card"><span class="output-value" id="yearsSavedAggressive">--</span><span class="output-label">Years Saved</span></div>
+                                <div class="output-card"><span class="output-value" id="interestSavedAggressive">--</span><span class="output-label">Interest Saved</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-10 h-64 md:h-auto"><canvas id="loanChartAggressive"></canvas></div>
+            </div>
+            <div id="contentFlex" data-tab-content="flex" class="hidden">
+                <div class="flex flex-col">
+                    <div class="order-2 md:order-1 mb-8">
+                        <h2 class="text-center mb-6">Loan Comparison</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="originalTermFlex">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newTermFlex" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Loan Term</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="currentRepaymentFlex">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newRepaymentFlex" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Monthly Repayment</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl border flex flex-col text-center">
+                                <div class="flex-grow flex items-center justify-center gap-2 text-lg md:text-xl font-semibold"><span id="originalInterestFlex">--</span><svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg><span id="newInterestFlex" class="text-blue-600 font-bold">--</span></div>
+                                <p class="mt-2 text-sm text-gray-600">Total Interest</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 md:order-2">
+                        <h2 class="text-center mb-6">Savings Breakdown</h2>
+                        <div class="space-y-6 mb-8">
+                            <div class="output-card output-card-main"><span class="output-value" id="cashSavedFlex">--</span><span class="output-label">Total Cash Saved</span></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                                <div class="output-card"><span class="output-value" id="yearsSavedFlex">--</span><span class="output-label">Years Saved</span></div>
+                                <div class="output-card"><span class="output-value" id="interestSavedFlex">--</span><span class="output-label">Interest Saved</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-10 h-64 md:h-auto"><canvas id="loanChartFlex"></canvas></div>
+            </div>
+            <div id="contactSection">
+                <div class="contact-content-wrapper">
+                    <div id="formContainer">
+                        <h2 class="text-center mb-2">Ready to Take the Next Step?</h2>
+                        <p class="text-center mb-6">Connect with a licensed restructuring professional to help you achieve these results.</p>
+                        <form id="contactForm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label for="firstName">First Name</label><input type="text" id="firstName" name="firstname" required></div>
+                                <div><label for="lastName">Last Name</label><input type="text" id="lastName" name="lastname" required></div>
+                                <div class="md:col-span-2"><label for="email">Email Address</label><input type="email" id="email" name="email" required></div>
+                                <!-- Phone + Send Code (inline) -->
+                                <div class="md:col-span-2">
+                                    <label for="phone">Phone Number</label>
+                                    <div class="relative mt-1">
+                                        <input
+                                            type="tel"
+                                            id="phone"
+                                            name="phone"
+                                            placeholder="+614xxxxxxxx"
+                                            class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                                        />
+                                        <button type="button" id="sendCodeBtn">Send Code</button>
+                                    </div>
+
+                                    <!-- Verify row (shown after code is sent) -->
+                                    <div id="verifySection" class="mt-3 hidden">
+                                        <div class="flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                id="verifyCode"
+                                                inputmode="numeric"
+                                                autocomplete="one-time-code"
+                                                placeholder="Enter 6-digit code"
+                                                class="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                                            />
+                                            <button type="button" id="checkCodeBtn" class="rounded-md bg-green-600 text-white px-3 py-2 text-sm hover:bg-green-700">
+                                                Verify
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <p id="verifyStatus" class="mt-2 text-sm text-gray-500"></p>
+                                </div>
+                            </div>
+                            <button type="submit" id="submitContactBtn"><span class="btn-text">Request a Free Consultation</span><span class="spinner hidden ml-2"></span></button>
+                        </form>
+                    </div>
+                    <div id="formSuccessMessage" class="hidden mt-4 text-center p-3 rounded-md"></div>
+                </div>
+            </div>
+            <button id="recalculateBtn">Start Over</button>
+        </div>
+    </div>
+    <button id="tailorLoanBtn"><span class="btn-inner">Tailor My Loan Structure</span></button>
+    <script>
+        // --- Phone verify state ---
+        let phoneVerified = false;
+
+        function setPhoneVerified(v) {
+        phoneVerified = !!v;
+        const submitBtn = document.getElementById("submitContactBtn");
+        const status = document.getElementById("verifyStatus");
+        if (submitBtn) submitBtn.disabled = !phoneVerified;
+        if (status) {
+            status.className = "mt-2 text-sm " + (phoneVerified ? "text-green-600" : "text-gray-500");
+            status.textContent = phoneVerified ? "Phone verified ✔" : "We’ll text you a code to verify your number.";
+        }
+        }
+
+        function toE164AU(raw) {
+        // Convert 04xxxxxxxx → +614xxxxxxxx, or keep +61 as-is
+        if (!raw) return "";
+        let p = raw.replace(/\s+/g, "");
+        if (p.startsWith("+")) return p;
+        if (p.startsWith("04")) return "+61" + p.slice(1);
+        if (p.startsWith("4")) return "+61" + p;
+        if (/^\d{9,10}$/.test(p)) return "+61" + p.replace(/^0/, "");
+        return p;
+        }
+
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwr3OLM-RoMaae_Eb_4osi8lpA3WJA89PrwBoY0e9DeR3qIGPVr2yd8hM4lUpbG4leZwg/exec';
+        const pg = { input: document.getElementById("inputPage"), loading: document.getElementById("loadingPage"), output: document.getElementById("outputPage") };
+        const ip = { loanBalance: document.getElementById("loanBalance"), interestRate: document.getElementById("interestRate"), monthlyRepayment: document.getElementById("monthlyRepayment"), savings: document.getElementById("savings"), monthlyLivingExpenses: document.getElementById("monthlyLivingExpenses"), monthlyIncome: document.getElementById("monthlyIncome") };
+        const tb = document.querySelectorAll(".tab-btn");
+        const tc = document.querySelectorAll("[data-tab-content]");
+        const op = { cso: document.getElementById("cashSavedOffset"), csa: document.getElementById("cashSavedAggressive"), csf: document.getElementById("cashSavedFlex"), oto: document.getElementById("originalTermOffset"), oio: document.getElementById("originalInterestOffset"), cro: document.getElementById("currentRepaymentOffset"), nto: document.getElementById("newTermOffset"), nio: document.getElementById("newInterestOffset"), nro: document.getElementById("newRepaymentOffset"), yso: document.getElementById("yearsSavedOffset"), iso: document.getElementById("interestSavedOffset"), ota: document.getElementById("originalTermAggressive"), oia: document.getElementById("originalInterestAggressive"), cra: document.getElementById("currentRepaymentAggressive"), nta: document.getElementById("newTermAggressive"), nia: document.getElementById("newInterestAggressive"), nra: document.getElementById("newRepaymentAggressive"), ysa: document.getElementById("yearsSavedAggressive"), isa: document.getElementById("interestSavedAggressive"), otf: document.getElementById("originalTermFlex"), oif: document.getElementById("originalInterestFlex"), crf: document.getElementById("currentRepaymentFlex"), ntf: document.getElementById("newTermFlex"), nif: document.getElementById("newInterestFlex"), nrf: document.getElementById("newRepaymentFlex"), ysf: document.getElementById("yearsSavedFlex"), isf: document.getElementById("interestSavedFlex") };
+        const bt = { calculate: document.getElementById("calculateBtn"), recalculate: document.getElementById("recalculateBtn"), tailorLoan: document.getElementById("tailorLoanBtn"), submitContact: document.getElementById("submitContactBtn") };
+        const cf = { section: document.getElementById("contactSection"), container: document.getElementById("formContainer"), form: document.getElementById("contactForm"), successMessage: document.getElementById("formSuccessMessage") };
+        let ci = { offset: null, aggressive: null, flex: null };
+        let vt = new Set;
+        let cr = {}, si = {};
+        let pt = null, it = null, lw = window.innerWidth, phbs = false;
+        let subId = null
+        const fC = e => isNaN(e) || !isFinite(e) ? "$--" : new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(e);
+        const fY = e => isNaN(e) || !isFinite(e) ? "-- Years" : `${e.toFixed(1)} Years`;
+
+        function animV(e, t, n, a) {
+            let l = null;
+            const o = i => {
+                l || (l = i);
+                const s = Math.min((i - l) / a, 1), r = Math.floor(s * (n - t) + t);
+                e.innerHTML = fC(r), s < 1 && window.requestAnimationFrame(o)
+            };
+            window.requestAnimationFrame(o)
+        }
+
+        // One delegated click handler on the form
+        if (cf && cf.form) {
+            cf.form.addEventListener("click", async (ev) => {
+                const btn = ev.target.closest("button");
+                if (!btn) return;
+
+                const phoneInput = document.getElementById("phone");
+                const codeInput  = document.getElementById("verifyCode");
+                const verifyRow  = document.getElementById("verifySection");
+                const status     = document.getElementById("verifyStatus");
+                if (!status) return;
+
+                // SEND CODE
+                if (btn.id === "sendCodeBtn") {
+                    const phoneRaw = (phoneInput?.value || "").trim();
+
+                    // Enforce +61 format only; show message if user typed 04...
+                    if (/^04\d{8}$/.test(phoneRaw)) {
+                        showStatus("Please use international format: +61 followed by 9 digits (e.g. +614xxxxxxxx).", false);
+                        phoneInput.focus();
+                        return;
+                    }
+                    if (!/^\+61\d{8,10}$/.test(phoneRaw.replace(/\s|-/g, ""))) {
+                        showStatus("Only Australian numbers in +61 format are accepted.", false);
+                        phoneInput.focus();
+                        return;
+                    }
+
+                    const phone = toE164AU(phoneRaw);
+
+                    btn.disabled = true;
+                    const original = btn.textContent;
+                    btn.textContent = "Sending…";
+                    showStatus("Sending code…", false);
+
+                    try {
+                        const res = await fetch(WEB_APP_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "text/plain;charset=utf-8" },
+                            body: JSON.stringify({ action: "sendCode", phone })
+                        });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        const json = await res.json();
+                        if (json.result !== "success") throw new Error(json.error || "Failed to send code");
+
+                        verifyRow?.classList.remove("hidden");
+                        showStatus("Code sent. Check your SMS and enter it below.", true);
+                    } catch (err) {
+                        console.error("sendCode error:", err);
+                        showStatus("Couldn’t send code: " + err.message, false);
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = original;
+                    }
+                }
+
+                // VERIFY CODE
+                if (btn.id === "checkCodeBtn") {
+                    const phoneRaw = (phoneInput?.value || "").trim();
+                    const phone = toE164AU(phoneRaw);
+                    const code  = (codeInput?.value || "").trim();
+
+                    if (!/^\+61\d{8,10}$/.test(phone.replace(/\s|-/g, ""))) {
+                        showStatus("Only Australian numbers in +61 format are accepted.", false);
+                        phoneInput?.focus();
+                        return;
+                    }
+                    if (!/^\d{4,8}$/.test(code)) {
+                        showStatus("Enter the 6-digit code from SMS.", false);
+                        codeInput?.focus();
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    const original = btn.textContent;
+                    btn.textContent = "Verifying…";
+                    showStatus("Verifying…", false);
+
+                    try {
+                        const res = await fetch(WEB_APP_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "text/plain;charset=utf-8" },
+                            body: JSON.stringify({ action: "verifyCode", phone, code })
+                        });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        const json = await res.json();
+                        if (json.result !== "success" || json.status !== "approved") {
+                            throw new Error(json.error || "Code invalid or expired");
+                        }
+
+                        phoneVerified = true;
+                        if (phoneInput)  phoneInput.readOnly = true;
+                        if (codeInput)   codeInput.readOnly = true;
+                        btn.textContent = "Verified ✅";
+                        showStatus("Phone verified successfully.", true);
+                    } catch (err) {
+                        console.error("verifyCode error:", err);
+                        btn.textContent = original;
+                        showStatus("Verification failed: " + err.message, false);
+                    } finally {
+                        btn.disabled = false;
+                    }
+                }
+            });
+
+            // Block form submit until verified
+            cf.form.addEventListener("submit", (e) => {
+                if (!phoneVerified) {
+                    e.preventDefault();
+                    showStatus("Please verify your phone number before submitting.", false);
+                    document.getElementById("verifySection")?.classList.remove("hidden");
+                    document.getElementById("verifyCode")?.focus();
+                }
+            });
+        }
+
+        function calc() {
+            si = { loanBalance: parseFloat(ip.loanBalance.value) || 0, monthlyRepayment: parseFloat(ip.monthlyRepayment.value) || 0, currentSavings: parseFloat(ip.savings.value) || 0, monthlyIncome: parseFloat(ip.monthlyIncome.value) || 0, monthlyExpenses: parseFloat(ip.monthlyLivingExpenses.value) || 0, interestRate: parseFloat(ip.interestRate.value) };
+            const { loanBalance: e, interestRate: t, monthlyRepayment: n, currentSavings: a, monthlyIncome: l, monthlyExpenses: o } = si;
+            const i = t / 100 / 12;
+            let s = 0, r = 0, d = [e];
+            if (i > 0 && e > 0 && n > e * i) {
+                s = -Math.log(1 - e * i / n) / Math.log(1 + i);
+                r = n * s - e;
+                let t = e;
+                for (let a = 0; a < Math.ceil(s); a++) {
+                    t = t * (1 + i) - n;
+                    if ((a + 1) % 12 == 0 || a === Math.ceil(s) - 1) {
+                        d.push(Math.max(0, t))
+                    }
+                }
+            } else { s = 1 / 0, r = 1 / 0 }
+            const c = l - o - n;
+            let m = 0, g = 0, p = [e], u = a;
+            if (e > 0) {
+                let t = e, s = a;
+                for (; t > 0;) {
+                    const e = Math.max(0, t - s) * i;
+                    g += e, t -= n - e, s += c, m++, m % 12 == 0 && p.push(Math.max(0, t));
+                    if (m > 1200) break
+                }
+                u = s, m % 12 != 0 && p.push(0)
+            }
+            const h = e - a, f = l - o;
+            let y = 0, v = 0, w = [h > 0 ? h : 0];
+            if (h > 0 && f > h * i) {
+                let t = h;
+                for (; t > 0;) {
+                    const e = t * i;
+                    v += e, t -= f - e, y++, y % 12 == 0 && w.push(Math.max(0, t));
+                    if (y > 1200) break
+                }
+                y % 12 != 0 && w.push(0)
+            } else y = h <= 0 ? 0 : 1 / 0, v = h <= 0 ? 0 : 1 / 0;
+            h <= 0 && (w = [0]);
+            const b = e > 0 && i > 0 ? e * i * Math.pow(1 + i, 360) / (Math.pow(1 + i, 360) - 1) : 0, S = l - o - b;
+            let k = 0, I = 0, L = [e], T = a;
+            if (e > 0 && b > 0) {
+                let t = e, n = a;
+                for (; t > 0;) {
+                    const e = Math.max(0, t - n) * i;
+                    I += e, t -= b - e, n += S, k++, k % 12 == 0 && L.push(Math.max(0, t));
+                    if (k > 1200) break
+                }
+                T = n, k % 12 != 0 && L.push(0)
+            }
+            cr = {
+                original: { T: s, INT: r, R: n, amortization: d },
+                offset: { T: m, INT: g, R: n, cash: u, amortization: p },
+                aggressive: { T: y, INT: v, R: f, cash: n * (s - y), amortization: w },
+                flex: { T: k, INT: I, R: b, cash: T, amortization: L }
+            }
+        }
+
+        function updUI() {
+            const { original: e, offset: t, aggressive: n, flex: a } = cr;
+            op.oto.textContent = fY(e.T / 12), op.cro.textContent = fC(e.R), op.oio.textContent = fC(e.INT), op.nto.textContent = fY(t.T / 12), op.nro.textContent = fC(t.R), op.nio.textContent = fC(t.INT), op.yso.textContent = fY((e.T - t.T) / 12), op.iso.textContent = fC(e.INT - t.INT), op.cso.textContent = fC(t.cash), op.ota.textContent = fY(e.T / 12), op.cra.textContent = fC(e.R), op.oia.textContent = fC(e.INT), op.nta.textContent = fY(n.T / 12), op.nra.textContent = fC(n.R), op.nia.textContent = fC(n.INT), op.ysa.textContent = fY((e.T - n.T) / 12), op.isa.textContent = fC(e.INT - n.INT), op.csa.textContent = fC(n.cash), op.otf.textContent = fY(e.T / 12), op.crf.textContent = fC(e.R), op.oif.textContent = fC(e.INT), op.ntf.textContent = fY(a.T / 12), op.nrf.textContent = fC(a.R), op.nif.textContent = fC(a.INT), op.ysf.textContent = fY((e.T - a.T) / 12), op.isf.textContent = fC(e.INT - a.INT), op.csf.textContent = fC(a.cash)
+        }
+
+        function rendC() {
+            cr.original && (rendCh("offset", cr.original.amortization, cr.offset.amortization), rendCh("aggressive", cr.original.amortization, cr.aggressive.amortization), rendCh("flex", cr.original.amortization, cr.flex.amortization))
+        }
+
+        function rendCh(e, t, n) {
+            const a = `loanChart${e.charAt(0).toUpperCase()+e.slice(1)}`, l = document.getElementById(a).getContext("2d");
+            ci[e] && ci[e].destroy();
+            const o = window.innerWidth < 768, i = Math.max(t.length, n.length) - 1, s = Array.from({ length: i + 1 }, (e, t) => 0 === t ? "Start" : `Y${t}`);
+            ci[e] = new Chart(l, {
+                type: "line",
+                data: { labels: s, datasets: [{ label: "Current Path", data: t, borderColor: "#94a3b8", fill: !1, tension: .1 }, { label: "Accelerated Path", data: n, borderColor: "#2563eb", fill: !1, tension: .1 }] },
+                options: {
+                    responsive: !0,
+                    maintainAspectRatio: !1,
+                    animation: { duration: 1 },
+                    plugins: { legend: { position: "top" }, tooltip: { callbacks: { label: e => `${e.dataset.label}: ${fC(e.parsed.y)}` } } },
+                    scales: { y: { beginAtZero: !0, title: { display: !0, text: "Loan Balance ($)" } }, x: { title: { display: !0, text: "Years" }, ticks: { maxTicksLimit: o ? 6 : 12 } } },
+                    elements: { point: { radius: o ? 2 : 3 } }
+                }
+            })
+        }
+
+        function swTab(e) {
+            const t = e.dataset.tab;
+            tb.forEach(e => e.classList.remove("active")), tc.forEach(e => e.classList.add("hidden")), e.classList.add("active"), document.querySelector(`[data-tab-content="${t}"]`).classList.remove("hidden");
+            if (!vt.has(t) && cr[t]) {
+                vt.add(t);
+                let e;
+                "offset" === t ? e = op.cso : "aggressive" === t ? e = op.csa : "flex" === t && (e = op.csf), e && animV(e, 0, cr[t].cash, 4500)
+            }
+            if (!phbs) {
+                phbs = true;
+
+                // wait 3s BEFORE showing the CTA
+                pt = setTimeout(() => {
+                    bt.tailorLoan.classList.add("visible"); // plays clean-pop-in
+                    hSc();
+
+                    // then wait another 3s to enter idle pulse (0.8↔0.6)
+                    it = setTimeout(() => {
+                        bt.tailorLoan.classList.add("idle");
+                    }, 3000);
+                }, 3000);
+            }
+        }
+
+        function resPop() {
+            clearTimeout(pt), clearTimeout(it), bt.tailorLoan.className = "", phbs = !1
+        }
+        // Disable submit until verified
+        setPhoneVerified(false);
+
+        // Reset verify state if phone changes
+        document.getElementById("phone").addEventListener("input", () => setPhoneVerified(false));
+
+        // === Phone: Send verification code (+61 only, block 04...) ===
+        (function enforceAUPhoneAndSend() {
+            // Grab form parts
+            const form       = document.getElementById("contactForm");
+            const phoneInput = document.getElementById("phone");
+            const sendBtn    = document.getElementById("sendCodeBtn");
+            const verifyRow  = document.getElementById("verifySection"); // ok if null
+            const codeInput  = document.getElementById("verifyCode");    // ok if null
+
+            if (!form || !phoneInput || !sendBtn) return;
+
+            // Ensure a live status row exists under the phone input
+            let status = document.getElementById("verifyStatus");
+            if (!status) {
+                status = document.createElement("p");
+                status.id = "verifyStatus";
+                status.className = "mt-2 text-sm text-red-600";
+                // Insert just after the phone input
+                phoneInput.parentElement.appendChild(status);
+            }
+
+            // Optional: HTML constraint for +61 (browser will show native error on submit)
+            phoneInput.setAttribute("inputmode", "tel");
+            phoneInput.setAttribute("placeholder", "+614xxxxxxxx");
+            phoneInput.setAttribute("pattern", "^\\+61\\d{9}$");
+            phoneInput.addEventListener("input", () => {
+                // Clear native validity message as user types
+                phoneInput.setCustomValidity("");
+                status.textContent = "";
+                status.className = "mt-2 text-sm text-red-600";
+            });
+
+            // Send code (blocks 04… and anything not +61xxxxxxxxx)
+            sendBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+
+                const raw = (phoneInput.value || "").trim();
+
+                // 1) Explicitly block Australian local format 04xxxxxxxx
+                if (/^04\d{8}$/.test(raw)) {
+                    status.className = "mt-2 text-sm text-red-600";
+                    status.textContent = "Please use international format (+61) instead of 04… (e.g. +614xx xxx xxx).";
+                    phoneInput.focus();
+                    return;
+                }
+
+                // 2) Must be +61 followed by 9 digits
+                if (!/^\+61\d{9}$/.test(raw)) {
+                    status.className = "mt-2 text-sm text-red-600";
+                    status.textContent = "Enter a valid Australian mobile in +61 format (e.g. +614xxxxxxxx).";
+                    // Also set native validity so form won’t submit prematurely
+                    phoneInput.setCustomValidity("Phone must be in +61 format");
+                    phoneInput.reportValidity();
+                    phoneInput.focus();
+                    return;
+                }
+
+                // UI feedback while sending
+                const originalText = sendBtn.textContent;
+                sendBtn.disabled = true;
+                sendBtn.textContent = "Sending…";
+                status.className = "mt-2 text-sm text-gray-500";
+                status.textContent = "Sending code…";
+
+                try {
+                    const res = await fetch(WEB_APP_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({ action: "sendCode", phone: raw })
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const json = await res.json();
+                    if (json.result !== "success") throw new Error(json.error || "Couldn’t send code");
+
+                    // Reveal verify section if you keep it hidden by default
+                    if (verifyRow) verifyRow.classList.remove("hidden");
+
+                    status.className = "mt-2 text-sm text-green-600";
+                    status.textContent = "Code sent. Check your SMS and enter it below.";
+                    if (codeInput) codeInput.focus();
+                } catch (err) {
+                    status.className = "mt-2 text-sm text-red-600";
+                    status.textContent = `Error sending code: ${err.message}`;
+                } finally {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = originalText;
+                }
+            });
+        })();
+
+        bt.recalculate.addEventListener("click", () => {
+            resPop(), pg.output.classList.add("hidden"), pg.input.classList.remove("hidden"), cf.container.classList.remove("hidden"), cf.successMessage.classList.add("hidden"), cf.form.reset()
+        });
+        cf.form.addEventListener("submit", e => {
+            e.preventDefault();
+            if (!phoneVerified) {
+                const status = document.getElementById("verifyStatus");
+                status.className = "mt-2 text-sm text-red-600";
+                status.textContent = "Please verify your phone number before submitting.";
+                return;
+            }
+            cf.container.classList.add("hidden"), cf.successMessage.classList.remove("hidden")
+        }), tb.forEach(e => {
+            e.addEventListener("click", () => swTab(e))
+        }), bt.tailorLoan.addEventListener("click", () => {
+            cf.section.scrollIntoView({ behavior: "smooth", block: "center" }), resPop()
+        });
+
+        bt.calculate.addEventListener("click", async () => {
+        try {
+            // Defensive checks so missing refs don't explode
+            if (!pg || !pg.input || !pg.loading || !pg.output) {
+                console.error("pg object or its properties are missing:", pg);
+                alert("Internal UI error: missing containers.");
+                return;
+            }
+
+            // Clear any prior messages/values if you have a vt.clear()
+            if (vt && typeof vt.clear === "function") vt.clear();
+
+            // Switch to loading
+            pg.input.classList.add("hidden");
+            pg.loading.classList.remove("hidden");
+
+            // Your calculator builds `si`
+            if (typeof calc === "function") {
+                calc();
+            } else {
+                throw new Error("calc() is not defined");
+            }
+
+            const payload = { ...si, action: "create" };
+
+            const res = await fetch(WEB_APP_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            console.log("create response:", json);
+
+            if (json.result !== "success" || !json.uuid) {
+                throw new Error(json.error || "Missing UUID in response");
+            }
+
+            // ✅ This line used to crash if subId wasn't declared
+            subId = json.uuid;
+
+            // Move to results (wrap UI ops to avoid breaking the flow)
+            setTimeout(() => {
+                try {
+                    // If you use this flag:
+                    if (typeof window !== "undefined") {
+                        window.isCurrentlyMobile = window.innerWidth < 768;
+                    }
+
+                    if (typeof updUI === "function") updUI();
+                    if (typeof rendC === "function") rendC();
+
+                    const tab = document.getElementById("tabOffset");
+                    if (tab && typeof swTab === "function") swTab(tab);
+
+                    pg.loading.classList.add("hidden");
+                    pg.output.classList.remove("hidden");
+                } catch (uiErr) {
+                    console.error("UI transition error:", uiErr);
+                    pg.loading.classList.add("hidden");
+                    // Keep user on loading/result? Up to you. I’d show an error:
+                    alert(`Rendering error: ${uiErr.message}`);
+                    // Fall back to inputs so they’re not stuck
+                    pg.input.classList.remove("hidden");
+                }
+            }, 500);
+
+        } catch (err) {
+            console.error("Calculate flow failed:", err);
+            // Return to inputs with a clear message
+            if (pg && pg.loading && pg.input) {
+                pg.loading.classList.add("hidden");
+                pg.input.classList.remove("hidden");
+            }
+            alert(`Sorry—couldn’t continue: ${err.message}`);
+        }
+    });
+
+
+
+        function resPop() {
+            clearTimeout(pt), clearTimeout(it), bt.tailorLoan.className = "", phbs = !1
+        }
+        bt.recalculate.addEventListener("click", () => {
+            resPop(), pg.output.classList.add("hidden"), pg.input.classList.remove("hidden"), cf.container.classList.remove("hidden"), cf.successMessage.classList.add("hidden"), cf.form.reset(), subId = null
+        });
+        cf.form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            	if (!subId) {
+                    console.error("No subId available at submit time.");
+                    cf.successMessage.textContent =
+                        "Could not submit because a unique submission ID was not created. Please start over.";
+                    cf.successMessage.className = "mt-4 text-center p-3 rounded-md bg-red-100 text-red-800";
+                    cf.successMessage.classList.remove("hidden");
+                    return;
+                }
+
+            const btn = document.getElementById("submitContactBtn");
+            const spinner = btn.querySelector(".spinner");
+            const label = btn.querySelector(".btn-text");
+
+            btn.disabled = true;
+            spinner && spinner.classList.remove("hidden");
+            if (label) label.textContent = "Submitting...";
+
+            const formData = new FormData(cf.form);
+            const contact = {};
+            formData.forEach((val, key) => (contact[key] = val));
+
+            const payload = {
+                ...contact,
+                submissionId: subId,
+                action: "update",
+                selectedStructure: document.querySelector(".tab-btn.active").textContent.trim(),
+            };
+
+            try {
+                const res = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "text/plain;charset=utf-8",
+                },
+                body: JSON.stringify(payload),
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const json = await res.json();
+
+                if (json.result !== "success") {
+                throw new Error(json.error || "Update failed");
+                }
+
+                cf.container.classList.add("hidden");
+                cf.successMessage.classList.remove("hidden");
+                cf.successMessage.textContent = "Thank you! A professional will be in touch shortly.";
+                cf.successMessage.className = "mt-4 text-center p-3 rounded-md bg-green-100 text-green-800";
+            } catch (err) {
+                console.error("Error submitting form:", err);
+                cf.successMessage.textContent = `An error occurred: ${err.message}`;
+                cf.successMessage.className = "mt-4 text-center p-3 rounded-md bg-red-100 text-red-800";
+                cf.successMessage.classList.remove("hidden");
+            } finally {
+                btn.disabled = false;
+                spinner && spinner.classList.add("hidden");
+                if (label) label.textContent = "Request a Free Consultation";
+            }
+            });
+
+        tb.forEach(e => {
+            e.addEventListener("click", () => swTab(e))
+        }), bt.tailorLoan.addEventListener("click", () => {
+            cf.section.scrollIntoView({ behavior: "smooth", block: "center" }), resPop()
+        });
+
+        function hSc() {
+            if (pg.output.classList.contains("hidden")) return;
+            const e = cf.section.getBoundingClientRect();
+            e.top < window.innerHeight && e.bottom > 0 ? bt.tailorLoan.classList.add("scrolled-past") : bt.tailorLoan.classList.remove("scrolled-past")
+        }
+        const deb = (e, t) => {
+            let n;
+            return function(...a) {
+                const l = () => { clearTimeout(n), e(...a) };
+                clearTimeout(n), n = setTimeout(l, t)
+            }
+        };
+        window.addEventListener("scroll", hSc, { passive: !0 }), window.addEventListener("resize", deb(() => {
+            if (pg.output.classList.contains("hidden")) return;
+            const e = window.innerWidth;
+            e !== lw && (lw = e, isCurrentlyMobile = e < 768, rendC())
+        }, 250));
+    </script>
+</body>
+</html>
+
