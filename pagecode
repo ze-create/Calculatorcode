@@ -328,19 +328,28 @@
     </div>
     <button id="tailorLoanBtn"><span class="btn-inner">Tailor My Loan Structure</span></button>
     <script>
-        // --- Phone verify state ---
-        let phoneVerified = false;
 
-        function setPhoneVerified(v) {
-        phoneVerified = !!v;
-        const submitBtn = document.getElementById("submitContactBtn");
-        const status = document.getElementById("verifyStatus");
-        if (submitBtn) submitBtn.disabled = !phoneVerified;
-        if (status) {
-            status.className = "mt-2 text-sm " + (phoneVerified ? "text-green-600" : "text-gray-500");
-            status.textContent = phoneVerified ? "Phone verified ✔" : "We’ll text you a code to verify your number.";
+        // ---- status + phone helpers (put these BEFORE your listeners) ----
+        function showStatus(msg, ok = false) {
+        const el = document.getElementById("verifyStatus");
+        if (!el) return;                   // avoid crashes if element missing
+        el.textContent = msg;
+        el.className = "mt-2 text-sm " + (ok ? "text-ok" : "text-error");
         }
-        }
+
+        // --- Phone verify state ---
+        //let phoneVerified = false;
+
+        //function setPhoneVerified(v) {
+        //phoneVerified = !!v;
+        //const submitBtn = document.getElementById("submitContactBtn");
+        //const status = document.getElementById("verifyStatus");
+        //if (submitBtn) submitBtn.disabled = !phoneVerified;
+        //if (status) {
+            //status.className = "mt-2 text-sm " + (phoneVerified ? "text-green-600" : "text-gray-500");
+            //status.textContent = phoneVerified ? "Phone verified ✔" : "We’ll text you a code to verify your number.";
+        //}
+        //}
 
         function toE164AU(raw) {
         // Convert 04xxxxxxxx → +614xxxxxxxx, or keep +61 as-is
@@ -379,7 +388,7 @@
             window.requestAnimationFrame(o)
         }
 
-        // One delegated click handler on the form
+            // One delegated click handler on the form
         if (cf && cf.form) {
             cf.form.addEventListener("click", async (ev) => {
                 const btn = ev.target.closest("button");
@@ -608,10 +617,10 @@
             clearTimeout(pt), clearTimeout(it), bt.tailorLoan.className = "", phbs = !1
         }
         // Disable submit until verified
-        setPhoneVerified(false);
+        //setPhoneVerified(false);
 
         // Reset verify state if phone changes
-        document.getElementById("phone").addEventListener("input", () => setPhoneVerified(false));
+        //document.getElementById("phone").addEventListener("input", () => setPhoneVerified(false));
 
         // === Phone: Send verification code (+61 only, block 04...) ===
         (function enforceAUPhoneAndSend() {
